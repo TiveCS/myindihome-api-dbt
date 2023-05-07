@@ -6,6 +6,8 @@ import {
   NewInboxSchema,
   NewInboxType,
 } from "../../domains/schemas/NewInboxSchema.js";
+import requireAuth from "../../middleware/requireAuth.js";
+import { User } from "@prisma/client";
 
 export class InboxController extends Controller {
   private readonly inboxService: InboxService;
@@ -39,6 +41,14 @@ export class InboxController extends Controller {
           res.status(500).json({ message: "Internal server error" });
         }
       }
+    });
+
+    app.get("/inbox", requireAuth, async (req, res) => {
+      const user: User = req.user as User;
+
+      const inbox = await this.inboxService.getInbox(user.id);
+
+      res.status(200).json({ message: "Successfully get inbox", data: inbox });
     });
   }
 }

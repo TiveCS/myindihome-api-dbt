@@ -17,6 +17,7 @@ import { InboxRepositoryPrisma } from "./infrastructures/repository/InboxReposit
 import { NewInboxUseCase } from "./usecases/inbox/NewInboxUseCase.js";
 import { InboxService } from "./http/inbox/InboxService.js";
 import { InboxController } from "./http/inbox/InboxController.js";
+import { GetInboxUseCase } from "./usecases/inbox/GetInboxUseCase.js";
 
 dotenv.config();
 
@@ -63,13 +64,17 @@ const loginUserUseCase: LoginUserUseCase = new LoginUserUseCase(
   tokenManager
 );
 const newInboxUseCase: NewInboxUseCase = new NewInboxUseCase(inboxRepository);
+const getInboxUseCase: GetInboxUseCase = new GetInboxUseCase(inboxRepository);
 
 // Service
 const authService: AuthService = new AuthService(
   registerUserUseCase,
   loginUserUseCase
 );
-const inboxService: InboxService = new InboxService(newInboxUseCase);
+const inboxService: InboxService = new InboxService(
+  newInboxUseCase,
+  getInboxUseCase
+);
 
 // Controller
 new AuthController(app, authService);
