@@ -1,20 +1,29 @@
+import bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import express, { Express } from "express";
-import bodyParser from "body-parser";
+import { UserRepository } from "./domains/repository/UserRepository.js";
+import { UserRepositoryPrisma } from "./infrastructures/repository/UserRepositoryPrisma.js";
+import { AuthController } from "./http/auth/AuthController.js";
+import { AuthService } from "./http/auth/AuthService.js";
+import { RegisterUserUseCase } from "./usecases/auth/RegisterUserUseCase.js";
 
 dotenv.config();
 
-const createServer = () => {
-  const server: Express = express();
+const app: Express = express();
+const port = process.env.PORT || 8080;
 
-  server.use(bodyParser.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-  return server;
-};
+const userRepository: UserRepository = new UserRepositoryPrisma();
 
-const server: Express = createServer();
-const port = process.env.PORT;
+const registerUserUseCase: RegisterUserUseCase = new RegisterUserUseCase(
+  userRepository
+);
+const authService: AuthService = new AuthService(registerUserUseCase);
 
-server.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+new AuthController(app, authService);
+
+app.listen(port, () => {
+  console.log(`[server] Server running on port ${port}`);
 });
