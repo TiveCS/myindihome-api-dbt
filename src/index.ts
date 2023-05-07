@@ -12,6 +12,12 @@ import passport from "passport";
 import { JwtStrategy } from "./security/strategy/JwtStrategy.js";
 import { JwtPayloadType } from "./domains/schemas/JwtPayloadSchema.js";
 import prisma from "./infrastructures/database/prismaClient.js";
+import { InboxRepository } from "./domains/repository/InboxRepository.js";
+import { InboxRepositoryPrisma } from "./infrastructures/repository/InboxRepositoryPrisma.js";
+import { NewInboxUseCase } from "./usecases/inbox/NewInboxUseCase.js";
+import { InboxService } from "./http/inbox/InboxService.js";
+import { InboxController } from "./http/inbox/InboxController.js";
+import { GetInboxUseCase } from "./usecases/inbox/GetInboxUseCase.js";
 
 dotenv.config();
 
@@ -47,6 +53,7 @@ const tokenManager: TokenManager = new TokenManager({
 
 // Repository
 const userRepository: UserRepository = new UserRepositoryPrisma();
+const inboxRepository: InboxRepository = new InboxRepositoryPrisma();
 
 // Use cases
 const registerUserUseCase: RegisterUserUseCase = new RegisterUserUseCase(
@@ -56,15 +63,22 @@ const loginUserUseCase: LoginUserUseCase = new LoginUserUseCase(
   userRepository,
   tokenManager
 );
+const newInboxUseCase: NewInboxUseCase = new NewInboxUseCase(inboxRepository);
+const getInboxUseCase: GetInboxUseCase = new GetInboxUseCase(inboxRepository);
 
 // Service
 const authService: AuthService = new AuthService(
   registerUserUseCase,
   loginUserUseCase
 );
+const inboxService: InboxService = new InboxService(
+  newInboxUseCase,
+  getInboxUseCase
+);
 
 // Controller
 new AuthController(app, authService);
+new InboxController(app, inboxService);
 
 app.listen(port, () => {
   console.log(`[server] Server running on port ${port}`);

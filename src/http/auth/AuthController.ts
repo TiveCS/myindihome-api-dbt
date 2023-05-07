@@ -10,17 +10,18 @@ import {
 } from "../../domains/schemas/NewUserSchema.js";
 import { AuthService } from "./AuthService.js";
 import requireAuth from "../../middleware/requireAuth.js";
+import Controller from "../../domains/http/Controller.js";
 
-export class AuthController {
+export class AuthController extends Controller {
   private readonly authService: AuthService;
 
   constructor(app: Express, authService: AuthService) {
-    this.authService = authService;
+    super(app);
 
-    this.registerRoutes(app);
+    this.authService = authService;
   }
 
-  registerRoutes(app: Express) {
+  registerRoutes(app: Express): void {
     app.post("/auth/register", async (req: Request, res: Response) => {
       const payload = req.body;
 
