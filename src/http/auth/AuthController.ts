@@ -34,7 +34,9 @@ export class AuthController {
       } catch (error) {
         if (error instanceof z.ZodError) {
           res.status(400).json({
-            message: error.issues.map((i) => `${i.path}: ${i.message}`),
+            message: error.issues.map(
+              (issue) => `${issue.path}: ${issue.message}`
+            ),
           });
         } else {
           res.status(500).json({ message: "Internal server error" });
@@ -54,7 +56,9 @@ export class AuthController {
       } catch (error) {
         if (error instanceof z.ZodError) {
           res.status(400).json({
-            message: error.issues.map((i) => `${i.path}: ${i.message}`),
+            message: error.issues.map(
+              (issue) => `${issue.path}: ${issue.message}`
+            ),
           });
         } else {
           res.status(500).json({ message: "Internal server error" });
