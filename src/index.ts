@@ -8,6 +8,10 @@ import { AuthService } from "./http/auth/AuthService.js";
 import { RegisterUserUseCase } from "./usecases/auth/RegisterUserUseCase.js";
 import { LoginUserUseCase } from "./usecases/auth/LoginUserUseCase.js";
 import { TokenManager } from "./security/TokenManager.js";
+import passport from "passport";
+import { JwtStrategy } from "./security/strategy/JwtStrategy.js";
+import { JwtPayloadType } from "./domains/schemas/JwtPayloadSchema.js";
+import prisma from "./infrastructures/database/prismaClient.js";
 
 dotenv.config();
 
@@ -16,6 +20,26 @@ const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+passport.use(
+  new JwtStrategy(async (payload: JwtPayloadType | undefined | null, done) => {
+    if (!payload) {
+      done(null, false);
+      return;
+    }
+
+    const { sub } = payload;
+
+    const user = await prisma.user.findUnique({ where: { id: sub } });
+
+    if (!user) {
+      done(null, false);
+      return;
+    }
+
+    done(null, user);
+  })
+);
 
 const tokenManager: TokenManager = new TokenManager({
   accessKeySecret: process.env.JWT_ACCESS_SECRET!,

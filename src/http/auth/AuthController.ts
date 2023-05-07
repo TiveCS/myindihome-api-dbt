@@ -9,6 +9,7 @@ import {
   NewUserType,
 } from "../../domains/schemas/NewUserSchema.js";
 import { AuthService } from "./AuthService.js";
+import requireAuth from "../../middleware/requireAuth.js";
 
 export class AuthController {
   private readonly authService: AuthService;
@@ -64,6 +65,12 @@ export class AuthController {
           res.status(500).json({ message: "Internal server error" });
         }
       }
+    });
+
+    app.get("/auth/me", requireAuth, async (req: Request, res: Response) => {
+      res.status(200).json({
+        message: "ok",
+      });
     });
   }
 }
