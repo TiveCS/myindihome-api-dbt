@@ -6,6 +6,8 @@ import { UserRepositoryPrisma } from "./infrastructures/repository/UserRepositor
 import { AuthController } from "./http/auth/AuthController.js";
 import { AuthService } from "./http/auth/AuthService.js";
 import { RegisterUserUseCase } from "./usecases/auth/RegisterUserUseCase.js";
+import { LoginUserUseCase } from "./usecases/auth/LoginUserUseCase.js";
+import { TokenManager } from "./security/TokenManager.js";
 
 dotenv.config();
 
@@ -15,13 +17,29 @@ const port = process.env.PORT || 8080;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+const tokenManager: TokenManager = new TokenManager({
+  accessKeySecret: process.env.JWT_ACCESS_SECRET!,
+});
+
+// Repository
 const userRepository: UserRepository = new UserRepositoryPrisma();
 
+// Use cases
 const registerUserUseCase: RegisterUserUseCase = new RegisterUserUseCase(
   userRepository
 );
-const authService: AuthService = new AuthService(registerUserUseCase);
+const loginUserUseCase: LoginUserUseCase = new LoginUserUseCase(
+  userRepository,
+  tokenManager
+);
 
+// Service
+const authService: AuthService = new AuthService(
+  registerUserUseCase,
+  loginUserUseCase
+);
+
+// Controller
 new AuthController(app, authService);
 
 app.listen(port, () => {
