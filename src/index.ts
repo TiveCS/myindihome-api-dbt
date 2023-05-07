@@ -18,6 +18,13 @@ import { NewInboxUseCase } from "./usecases/inbox/NewInboxUseCase.js";
 import { InboxService } from "./http/inbox/InboxService.js";
 import { InboxController } from "./http/inbox/InboxController.js";
 import { GetInboxUseCase } from "./usecases/inbox/GetInboxUseCase.js";
+import { SubscriptionRepository } from "./domains/repository/SubscriptionRepository.js";
+import { SubscriptionRepositoryPrisma } from "./infrastructures/repository/SubscriptionRepositiryPrisma.js";
+// import { NewSubscriptionUseCase } from "./usecases/subscription/NewSubscriptionUseCase.js";
+import { NewSubscriptionUseCase } from "./usecases/";
+import { SubscriptionController } from "./http/subscription/SubscriptionController.js";
+import { SubscriptionService } from "./services/SubscriptionService.js";
+
 
 dotenv.config();
 
@@ -54,6 +61,8 @@ const tokenManager: TokenManager = new TokenManager({
 // Repository
 const userRepository: UserRepository = new UserRepositoryPrisma();
 const inboxRepository: InboxRepository = new InboxRepositoryPrisma();
+const subscriptionRepository: SubscriptionRepository = new SubscriptionRepositoryPrisma();
+
 
 // Use cases
 const registerUserUseCase: RegisterUserUseCase = new RegisterUserUseCase(
@@ -65,6 +74,8 @@ const loginUserUseCase: LoginUserUseCase = new LoginUserUseCase(
 );
 const newInboxUseCase: NewInboxUseCase = new NewInboxUseCase(inboxRepository);
 const getInboxUseCase: GetInboxUseCase = new GetInboxUseCase(inboxRepository);
+const newSubscriptionUseCase: NewSubscriptionUseCase = new NewSubscriptionUseCase(subscriptionRepository);
+
 
 // Service
 const authService: AuthService = new AuthService(
@@ -75,10 +86,13 @@ const inboxService: InboxService = new InboxService(
   newInboxUseCase,
   getInboxUseCase
 );
+const subscriptionService: SubscriptionService = new SubscriptionService(newSubscriptionUseCase);
+
 
 // Controller
 new AuthController(app, authService);
 new InboxController(app, inboxService);
+new SubscriptionController(app, subscriptionService);
 
 app.listen(port, () => {
   console.log(`[server] Server running on port ${port}`);
