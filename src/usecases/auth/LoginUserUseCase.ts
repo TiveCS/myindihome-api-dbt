@@ -28,7 +28,6 @@ export class LoginUserUseCase {
       throw new Error("Password not match");
     }
 
-    // TODO: Generate JWT token
     const token = this.tokenManager.generateToken({
       sub: user.id,
     });
